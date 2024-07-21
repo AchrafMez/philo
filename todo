@@ -1,0 +1,23 @@
+**The philosophers dinner problem**
+
+* there are a table and there are philosophers around it
+* the philo must eat or think or sleep, they should do one process
+* every philo must have his own fork
+* the philo must eat with two forks, his left and right fork
+* if the philo finished eating, he puts their forks on the table and start sleeping, once awake he start thinking
+* the program stops when a philo dies of starvation
+* (eating -> sleeping -> thinking)
+
+==============================================
+
+* program arguments :
+./philo   number_of_philo   time_to_die(ms)   time_to_eat(ms)   time_to_sleep(ms)   time_to_eat(optional)
+
+       5     1
+
+    6     .     2
+
+       4     3
+
+* each philo has number ranging form 1 ro N
+* philo number N sits next to philo N-1 and N+1
