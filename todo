@@ -6,12 +6,12 @@
 * the philo must eat with two forks, his left and right fork
 * if the philo finished eating, he puts their forks on the table and start sleeping, once awake he start thinking
 * the program stops when a philo dies of starvation
-* (eating -> sleeping -> thinking)
+* (eating -> sleeping -> thinking : repeat)
 
 ==============================================
 
 * program arguments :
-./philo   number_of_philo   time_to_die(ms)   time_to_eat(ms)   time_to_sleep(ms)   time_to_eat(optional)
+./philo   number_of_philo   time_to_die(ms)   time_to_eat(ms)   time_to_sleep(ms)   numbers_time_to_eat(optional)
 
        5     1
 
