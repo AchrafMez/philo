@@ -13,11 +13,21 @@
 * program arguments :
 ./philo   number_of_philo   time_to_die(ms)   time_to_eat(ms)   time_to_sleep(ms)   numbers_time_to_eat(optional)
 
-       5     1
+       6     1
 
-    6     .     2
+    5     .     2
 
        4     3
 
+
+
 * each philo has number ranging form 1 ro N
 * philo number N sits next to philo N-1 and N+1
+
+
+in case i gave optional parameter 
+   => 5
+in case i havent
+ ==> -1
+
+ ===> 19990000000       ====> 19990000100 ===> 100 printf
