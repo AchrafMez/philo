@@ -3,19 +3,32 @@
 
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/time.h>
 #include <stdlib.h>
+#include <sys/time.h>
+#include <pthread.h>
 
 
 typedef struct s_philo
 {
-    unsigned int philo;
-    unsigned int forsk;
+    unsigned int philo_id;
+    unsigned int left_fork;
+    unsigned int right_fork;
+}   t_philo;
+
+typedef struct s_data
+{
+    pthread_mutex_t forks[200];
+    pthread_mutex_t left_fork;
+    pthread_mutex_t right_fork;
     unsigned int time_to_die;
     unsigned int time_to_eat;
     unsigned int time_to_sleep;
-    unsigned int numbers_time_to_eat;
-}   t_philo;
+    int numbers_time_to_eat;
+    int philo_num;
+    t_philo *philos;
+
+} t_data;
+
 
 /*
     create a struct that wold contain general information 
@@ -68,11 +81,9 @@ typedef struct s_philo
             //  lock the printf mutex so that no ither thread can run printf
             // kill all philosephers
 
-
-
 //parsing
 char *arg_check(char *str);
-void treat(char **str, t_philo *data);
+void treat(char **str, t_data *data);
 int ft_atoi(char *str);
 void ft_arguments_error();
-#endif
+#endif  

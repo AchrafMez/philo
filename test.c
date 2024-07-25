@@ -1,7 +1,5 @@
 #include "philo.h"
 
-
-int get_time_of
 void ft_usleep()
 {
 

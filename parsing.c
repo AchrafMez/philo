@@ -25,19 +25,19 @@ char* arg_check(char *str)
     return str;
 }
 
-void treat(char **str, t_philo *data)
+void treat(char **str, t_data *data)
 {
     int i = 1;
+    data->numbers_time_to_eat = -1;
     while(str[i])
     {
-        data->philo = ft_atoi(arg_check(str[i++]));
+        data->philo_num = ft_atoi(arg_check(str[i++]));
         data->time_to_die = ft_atoi(arg_check(str[i++]));
         data->time_to_eat = ft_atoi(arg_check(str[i++]));
         data->time_to_sleep = ft_atoi(arg_check(str[i++]));
         if(str[i] != NULL)
             data->numbers_time_to_eat = ft_atoi(arg_check(str[i++]));
     }
-    data->forsk = data->philo;
 }
 
 int ft_atoi(char *str)
@@ -54,7 +54,7 @@ int ft_atoi(char *str)
             countminus++;
         else if(*str == '+')
             countplus++;
-            str++;
+        str++;
     }
     while(*str >= '0' && *str <= '9')
     {
