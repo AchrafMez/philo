@@ -38,6 +38,7 @@ void treat(char **str, t_data *data)
         if(str[i] != NULL)
             data->numbers_time_to_eat = ft_atoi(arg_check(str[i++]));
     }
+    check_error(data);
 }
 
 int ft_atoi(char *str)

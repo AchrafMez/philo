@@ -1,7 +1,7 @@
 NAME = philo
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
-SRCS = parsing.c philo.c
+CFLAGS = -Wall -Wextra -Werror -I./philo/philo.h
+SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)

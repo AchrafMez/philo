@@ -18,14 +18,12 @@ typedef struct s_philo
 typedef struct s_data
 {
     pthread_mutex_t forks[200];
-    pthread_mutex_t left_fork;
-    pthread_mutex_t right_fork;
     unsigned int time_to_die;
     unsigned int time_to_eat;
     unsigned int time_to_sleep;
     int numbers_time_to_eat;
     int philo_num;
-    t_philo *philos;
+    t_philo philos[200];
 
 } t_data;
 
@@ -80,10 +78,14 @@ typedef struct s_data
      // a philo has died 
             //  lock the printf mutex so that no ither thread can run printf
             // kill all philosephers
+//errors
+void ft_error(void);
+void check_error(t_data *data);
 
 //parsing
 char *arg_check(char *str);
 void treat(char **str, t_data *data);
 int ft_atoi(char *str);
-void ft_arguments_error();
-#endif  
+void ft_arguments_error(void);
+
+#endif
