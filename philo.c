@@ -10,22 +10,62 @@ void ft_arguments_error(void)
  void init(t_data *data)
  {
      int i = 0;
-     printf("philo numbers: %d %d\n ", data->philo_num, i);
+     data->philos = (t_philo *)malloc(sizeof(t_philo) * data->philo_num);
+     if(!data->philos)
+            return ;
+     data->forks = malloc(sizeof(t_fork) * data->philo_num);
+     if(!data->forks)
+         return ;
      while(i < data->philo_num)
      {
          data->philos[i].philo_id = i + 1;
-         data->philos[i].right_fork = i;
-         data->philos[i].left_fork = i + 1;
-             if(i == data->philo_num - 1)
-             {
-                 data->philos[i].right_fork = i;
-                 data->philos[i].left_fork = 0;
-             }
+         data->forks[i].fork_id = i;
+         data->philos[i].right_fork = &data->forks[data->philos[i].philo_id - 1];
+         data->philos[i].left_fork = &data->forks[i + 1];
+         if (i == data->philo_num - 1)
+             data->philos[i].left_fork = &data->forks[0];
          i++;
      }
  }
+void pick_up_right_fork()
+{
 
-//:w
+}
+
+void pick_up_left_fork()
+{
+
+}
+
+void eat()
+{
+
+}
+
+void thinking()
+ {
+    printf("the philosohpy is thinkg ...\n");
+ }
+
+ void* routine()
+ {
+    thinking();
+    int i = 0;
+    while(i--)
+    {
+        printf("");
+    }
+    return NULL;
+ }
+
+ void create_threads(t_data *data)
+ {
+    int i = 0;
+    pthread_t thread1;
+    pthread_create(&thread1, NULL, &routine, NULL);
+
+ }
+
 
 int main(int ac, char **av)
 {
@@ -36,26 +76,16 @@ int main(int ac, char **av)
         treat(av, &data);
         init(&data);
 
-        printf("number of philo -> %d\n", data.philo_num);
         int i = 0;
-        while(i < data.philo_num)
-        {
-            printf("\n===== PHILOS DATA ======\n");
-            printf("philos id ----> %d\n", data.philos[i].philo_id);
-            printf("right fork %d\n", data.philos[i].right_fork);
-            printf("left fork %d\n", data.philos[i].left_fork);
+        while(i < data.philo_num) {
+            printf("philo id: %d | right fork_id: %d | left fork_id: %d\n", data.philos[i].philo_id,
+                   data.philos[i].right_fork->fork_id, data.philos[i].left_fork->fork_id);
+
             i++;
         }
-//        printf("number of forks -> %d\n", data.forks);
-//        printf("time to die -> %d\n", data.time_to_die);
-//        printf("time to eat -> %d\n", data.time_to_eat);
-//        printf("time to sleep -> %d\n", data.time_to_sleep);
-//        printf("number time to eat -> %d\n", data.numbers_time_to_eat);
     }
     else
         ft_error();
     return 0;
-
-
 
 }

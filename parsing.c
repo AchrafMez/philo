@@ -17,11 +17,8 @@ char* arg_check(char *str)
         ft_arguments_error();
     while(str[i] >= '0' && str[i] <= '9')
         i++;
-    printf("character: %c\n", str[i]);
     if((str[i] != '\0') && (!(str[i] >= '0' && str[i] <= '9')))
-    {
         ft_arguments_error();
-    }
     return str;
 }
 
