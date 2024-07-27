@@ -16,10 +16,17 @@ typedef struct s_fork
 
 typedef struct s_philo
 {
+    pthread_t *thread;
+    pthread_mutex_t waiter;
     int philo_id;
     t_fork *left_fork;
     t_fork *right_fork;
+    unsigned int time_to_eat;
+    unsigned int time_to_sleep;
+    int isDead;
 }   t_philo;
+
+
 
 typedef struct s_data
 {
@@ -93,5 +100,9 @@ char *arg_check(char *str);
 void treat(char **str, t_data *data);
 int ft_atoi(char *str);
 void ft_arguments_error(void);
+
+//usleep
+void ft_usleep(unsigned long arg);
+unsigned long ft_get_time_of_day();
 
 #endif
