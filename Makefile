@@ -1,13 +1,13 @@
 NAME = philo
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -I./philo/philo.h
+CFLAGS = -Wall -Wextra -Werror -fsanitize=thread -g
 #-fsanitize=address -g
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
+$(NAME): philo.h $(OBJS)
 	$(CC) $(CFLAGS) -o $(NAME) $(OBJS)
 
 clean:

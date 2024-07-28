@@ -7,37 +7,36 @@
 #include <sys/time.h>
 #include <pthread.h>
 
+typedef struct s_data t_data;
+
 typedef struct s_fork
 {
     pthread_mutex_t fork;
     int fork_id;
 } t_fork;
 
-
 typedef struct s_philo
 {
     pthread_t *thread;
     pthread_mutex_t waiter;
+    pthread_mutex_t meal;
     int philo_id;
     t_fork *left_fork;
     t_fork *right_fork;
-    unsigned int time_to_eat;
-    unsigned int time_to_sleep;
-    int isDead;
+    t_data *datas;
+    unsigned long last_meal_time;
+//    int isDead;
 }   t_philo;
-
-
 
 typedef struct s_data
 {
+    t_philo *philos;
     t_fork *forks;
     unsigned int time_to_die;
     unsigned int time_to_eat;
     unsigned int time_to_sleep;
     int numbers_time_to_eat;
     int philo_num;
-    t_philo *philos;
-
 } t_data;
 
 

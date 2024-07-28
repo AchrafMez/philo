@@ -25,6 +25,7 @@ char* arg_check(char *str)
 void treat(char **str, t_data *data)
 {
     int i = 1;
+
     data->numbers_time_to_eat = -1;
     while(str[i])
     {
