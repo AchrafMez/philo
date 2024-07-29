@@ -46,10 +46,19 @@ void ft_arguments_error(void)
 void pick_up_forks(t_philo *philo)
 {
     pthread_mutex_lock(&philo->waiter);
-    if((pthread_mutex_lock(&(philo->right_fork->fork)) == 0) && (pthread_mutex_lock(&(philo->left_fork->fork)) ==0 )){
+    if((pthread_mutex_lock(&(philo->right_fork->fork)) == 0)){
         printf("%lu %d has taken a fork\n", ft_get_time_of_day() - start_time, philo->philo_id);
+    }
+    if(philo->datas->philo_num == 1)
+    {
+        printf("%lu %d died\n", ft_get_time_of_day() - start_time, philo->philo_id);
+        exit(0);
+    }
+    else if( (pthread_mutex_lock(&(philo->left_fork->fork)) ==0 ))
+    {
         printf("%lu %d has taken a fork\n", ft_get_time_of_day() - start_time, philo->philo_id);
-    } else
+    }
+    else
     {
         printf("lock mutex failed");
         exit(1);
@@ -86,12 +95,13 @@ void thinking(t_philo *philo)
      ft_usleep(philo->datas->time_to_sleep);
  }
 
-int moinitor(t_data *data)
+int monitor(t_data *data)
 {
     int i = 0;
+    unsigned long current_time = ft_get_time_of_day();
     while(i < data->philo_num)
     {
-        if(data->philos[i].last_meal_time > ft_get_time_of_day())
+        if(current_time - data->philos[i].last_meal_time > data->time_to_die)
             return 0;
         i++;
     }
@@ -117,9 +127,12 @@ int moinitor(t_data *data)
          pick_up_forks(philo);
          eat(philo);
          put_down_forks(philo);
+        if(monitor(philo->datas) == 0)
+        {   
+            printf("%lu %d died\n", ft_get_time_of_day() - start_time, philo->philo_id);
+            exit(0);
+        }
          sleeping(philo);
-//         if(moinitor(philo) == 0)
-//            exit(0);
      }
     return NULL;
  }
@@ -162,6 +175,8 @@ int main(int ac, char **av)
         treat(av, &data);
         init(&data);
         create_threads(&data);
+        printf("%ld\n", data.philos[0].last_meal_time);
+        sleep(10);
 //        int i = 0;
 //        while(i < data.philo_num)
 //        {
