@@ -1,5 +1,6 @@
 #include "philo.h"
 
+unsigned  long start_time;
 void ft_arguments_error(void)
 {
     write(2, "Arguments error\n", 16);
@@ -46,8 +47,8 @@ void pick_up_forks(t_philo *philo)
 {
     pthread_mutex_lock(&philo->waiter);
     if((pthread_mutex_lock(&(philo->right_fork->fork)) == 0) && (pthread_mutex_lock(&(philo->left_fork->fork)) ==0 )){
-        printf("the philopher %d pick up right fork %d\n", philo->philo_id , philo->right_fork->fork_id);
-        printf("the philopher %d pick up left fork %d\n", philo->philo_id ,philo->left_fork->fork_id);
+        printf("%lu %d has taken a fork\n", ft_get_time_of_day() - start_time, philo->philo_id);
+        printf("%lu %d has taken a fork\n", ft_get_time_of_day() - start_time, philo->philo_id);
     } else
     {
         printf("lock mutex failed");
@@ -58,18 +59,15 @@ void pick_up_forks(t_philo *philo)
 
 void put_down_forks(t_philo *philo)
 {
-    if((pthread_mutex_unlock(&philo->right_fork->fork)) == 0 && (pthread_mutex_unlock(&philo->left_fork->fork)) == 0){
-        printf("the philo %d put down right fork %d\n", philo->philo_id, philo->right_fork->fork_id);
-        printf("the philo %d put down left fork %d\n", philo->philo_id, philo->left_fork->fork_id);
-    } else{
-        printf("unlock forks failed\n");
-        exit(1);
-    }
+    pthread_mutex_lock(&philo->waiter);
+    pthread_mutex_unlock(&philo->right_fork->fork);
+    pthread_mutex_unlock(&philo->left_fork->fork);
+    pthread_mutex_unlock(&philo->waiter);
 }
 
 void eat(t_philo *philo)
 {
-    printf("        the philo %d eating       \n", philo->philo_id);
+    printf("%lu %d is eating\n", ft_get_time_of_day() - start_time, philo->philo_id);
     ft_usleep(philo->datas->time_to_eat);
     pthread_mutex_lock(&philo->meal);
     philo->last_meal_time = ft_get_time_of_day();
@@ -79,15 +77,26 @@ void eat(t_philo *philo)
 
 void thinking(t_philo *philo)
  {
-    printf("the philosopher %d is thinkg \n", philo->philo_id);
+     printf("%lu %d is thinking\n", ft_get_time_of_day() - start_time, philo->philo_id);
  }
 
  void sleeping(t_philo *philo)
  {
-    printf("the philosopher %d sleeping \n", philo->philo_id);
-    ft_usleep(philo->datas->time_to_sleep);
+     printf("%lu %d is sleeping\n", ft_get_time_of_day() - start_time, philo->philo_id);
+     ft_usleep(philo->datas->time_to_sleep);
  }
 
+int moinitor(t_data *data)
+{
+    int i = 0;
+    while(i < data->philo_num)
+    {
+        if(data->philos[i].last_meal_time > ft_get_time_of_day())
+            return 0;
+        i++;
+    }
+    return 1;
+}
 
  void* routine(void *arg)
  {
@@ -101,6 +110,7 @@ void thinking(t_philo *philo)
          thinking(philo);
          ft_usleep(30);
      }
+     philo->last_meal_time = ft_get_time_of_day();
      while (1)
      {
          thinking(philo);
@@ -108,6 +118,8 @@ void thinking(t_philo *philo)
          eat(philo);
          put_down_forks(philo);
          sleeping(philo);
+//         if(moinitor(philo) == 0)
+//            exit(0);
      }
     return NULL;
  }
@@ -122,7 +134,7 @@ void thinking(t_philo *philo)
 //        data->philos[i].time_to_eat = data->time_to_eat;
 //        data->philos[i].time_to_sleep= data->time_to_sleep;
         pthread_create(&data->philos->thread[i], NULL, &routine, &data->philos[i]);
-        printf("time to eat: %d\n", data->philos->datas->time_to_eat);
+//        printf("time to eat: %d\n", data->philos->datas->time_to_eat);
         i++;
     }
      i = 0;
@@ -137,7 +149,14 @@ void thinking(t_philo *philo)
 int main(int ac, char **av)
 {
     t_data data;
+    start_time = ft_get_time_of_day();
+//    data.philos->start_time = ft_get_time_of_day();
+//    printf("philo start: %lu\n", data.philos->start_time);
+//    printf("data start :%lu\n", data.start_time);
+//    unsigned long start = ft_get_time_of_day();
+//    printf("start -> %lu", ft_get_time_of_day() - start);
 
+//    exit(0);
     if(ac == 5 || ac == 6)
     {
         treat(av, &data);

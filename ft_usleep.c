@@ -18,3 +18,9 @@ void ft_usleep(unsigned long arg)
         usleep(100);
     }
 }
+
+//int main(int ac, char**av)
+//{
+//    unsigned long start = ft_get_time_of_day();
+//    printf("start %lu\n", start);
+//}
