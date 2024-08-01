@@ -20,23 +20,27 @@ typedef struct s_philo
     pthread_t *thread;
     pthread_mutex_t waiter;
     pthread_mutex_t meal;
+    pthread_mutex_t print;
     int philo_id;
     t_fork *left_fork;
     t_fork *right_fork;
     t_data *datas;
     unsigned long last_meal_time;
-//    int isDead;
 }   t_philo;
 
 typedef struct s_data
 {
     t_philo *philos;
     t_fork *forks;
+    pthread_mutex_t last_time;
     unsigned int time_to_die;
     unsigned int time_to_eat;
     unsigned int time_to_sleep;
     int numbers_time_to_eat;
     int philo_num;
+    pthread_mutex_t dead_mut;
+    int dead;
+    unsigned long start_time;
 } t_data;
 
 

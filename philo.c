@@ -1,6 +1,5 @@
 #include "philo.h"
 
-unsigned  long start_time;
 void ft_arguments_error(void)
 {
     write(2, "Arguments error\n", 16);
@@ -31,6 +30,10 @@ void ft_arguments_error(void)
 
      //init mutexx
      i = 0;
+     pthread_mutex_init(&data->philos->print, NULL);
+     pthread_mutex_init(&data->philos->waiter, NULL);
+     pthread_mutex_init(&data->last_time, NULL);
+     pthread_mutex_init(&data->dead_mut, NULL);
      int ret;
      while(i < data->philo_num)
      {
@@ -42,67 +45,98 @@ void ft_arguments_error(void)
          i++;
      }
  }
+int get_dead(t_data *data)
+{
+    //1 dead
+    //0 not dead
+    int is_die;
+    pthread_mutex_lock(&data->dead_mut);
+    is_die = data->dead;
+    pthread_mutex_unlock(&data->dead_mut);
+    return(is_die);
+}
 
 void pick_up_forks(t_philo *philo)
 {
-    pthread_mutex_lock(&philo->waiter);
-    if((pthread_mutex_lock(&(philo->right_fork->fork)) == 0)){
-        printf("%lu %d has taken a fork\n", ft_get_time_of_day() - start_time, philo->philo_id);
+    if((pthread_mutex_lock(&(philo->right_fork->fork)) == 0) && (get_dead(philo->datas) == 0)){
+        printf("%lu %d has taken a fork\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
     }
     if(philo->datas->philo_num == 1)
     {
-        printf("%lu %d died\n", ft_get_time_of_day() - start_time, philo->philo_id);
+        ft_usleep(philo->datas->time_to_die);
+        printf("%lu %d died\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
         exit(0);
     }
-    else if( (pthread_mutex_lock(&(philo->left_fork->fork)) ==0 ))
+    else if( (pthread_mutex_lock(&(philo->left_fork->fork)) == 0) && (get_dead(philo->datas)) == 0)
     {
-        printf("%lu %d has taken a fork\n", ft_get_time_of_day() - start_time, philo->philo_id);
+        printf("%lu %d has taken a fork\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
     }
-    else
-    {
-        printf("lock mutex failed");
-        exit(1);
-    }
-    pthread_mutex_unlock(&philo->waiter);
+//    else
+//    {
+//        printf("lock mutex failed");
+//        exit(1);
+//    }
 }
 
 void put_down_forks(t_philo *philo)
 {
-    pthread_mutex_lock(&philo->waiter);
     pthread_mutex_unlock(&philo->right_fork->fork);
     pthread_mutex_unlock(&philo->left_fork->fork);
-    pthread_mutex_unlock(&philo->waiter);
 }
+
 
 void eat(t_philo *philo)
 {
-    printf("%lu %d is eating\n", ft_get_time_of_day() - start_time, philo->philo_id);
-    ft_usleep(philo->datas->time_to_eat);
-    pthread_mutex_lock(&philo->meal);
-    philo->last_meal_time = ft_get_time_of_day();
-    pthread_mutex_unlock(&philo->meal);
+    if ((get_dead(philo->datas)) == 0)
+    {
+        pthread_mutex_lock(&philo->print);
+        printf("%lu %d is eating\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
+        ft_usleep(philo->datas->time_to_eat);
+        pthread_mutex_lock(&philo->datas->last_time);
+        philo->last_meal_time = ft_get_time_of_day();
+        pthread_mutex_unlock(&philo->datas->last_time);
+        pthread_mutex_unlock(&philo->print);
+    }
 }
 
 
 void thinking(t_philo *philo)
  {
-     printf("%lu %d is thinking\n", ft_get_time_of_day() - start_time, philo->philo_id);
+    if(get_dead(philo->datas) == 0)
+    {
+         pthread_mutex_lock(&philo->print);
+         printf("%lu %d is thinking\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
+         pthread_mutex_unlock(&philo->print);
+    }
  }
 
  void sleeping(t_philo *philo)
  {
-     printf("%lu %d is sleeping\n", ft_get_time_of_day() - start_time, philo->philo_id);
-     ft_usleep(philo->datas->time_to_sleep);
+    if(get_dead(philo->datas) == 0)
+    {
+
+         pthread_mutex_lock(&philo->print);
+         printf("%lu %d is sleeping\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
+         ft_usleep(philo->datas->time_to_sleep);
+         pthread_mutex_unlock(&philo->print);
+    }
  }
 
 int monitor(t_data *data)
 {
     int i = 0;
-    unsigned long current_time = ft_get_time_of_day();
+    unsigned long last_meal_t;
     while(i < data->philo_num)
     {
-        if(current_time - data->philos[i].last_meal_time > data->time_to_die)
-            return 0;
+            pthread_mutex_lock(&data->last_time);
+            last_meal_t = data->philos[i].last_meal_time;
+            pthread_mutex_unlock(&data->last_time);
+            if(ft_get_time_of_day() - last_meal_t >= data->time_to_die)
+            {
+                data->dead = 1;
+                printf("%lu %d died\n", ft_get_time_of_day() - data->start_time, data->philos[i].philo_id);
+                return  0;
+            }
         i++;
     }
     return 1;
@@ -112,26 +146,16 @@ int monitor(t_data *data)
  {
     t_philo  *philo = arg;
 
-//     printf("time to die: %d\n", philo->datas->time_to_die);
-//     printf("time to eat: %d\n", philo->datas->time_to_eat);
-//     printf("time to sleep: %d\n", philo->datas->time_to_sleep);
      if (philo->philo_id % 2 == 0)
-     {
-         thinking(philo);
-         ft_usleep(30);
-     }
-     philo->last_meal_time = ft_get_time_of_day();
+         sleeping(philo);
      while (1)
      {
+         if((get_dead(philo->datas)) == 1)
+             break ;
          thinking(philo);
          pick_up_forks(philo);
          eat(philo);
          put_down_forks(philo);
-        if(monitor(philo->datas) == 0)
-        {   
-            printf("%lu %d died\n", ft_get_time_of_day() - start_time, philo->philo_id);
-            exit(0);
-        }
          sleeping(philo);
      }
     return NULL;
@@ -139,66 +163,49 @@ int monitor(t_data *data)
  void create_threads(t_data *data)
  {
     int i = 0;
+    data->start_time = ft_get_time_of_day();
     data->philos->thread = malloc(sizeof(pthread_t *) * data->philo_num);
     if(!data->philos->thread)
             return ;
-    while(i < data->philo_num)
+     while(i < data->philo_num)
     {
-//        data->philos[i].time_to_eat = data->time_to_eat;
-//        data->philos[i].time_to_sleep= data->time_to_sleep;
+         data->philos[i].last_meal_time = data->start_time;
         pthread_create(&data->philos->thread[i], NULL, &routine, &data->philos[i]);
-//        printf("time to eat: %d\n", data->philos->datas->time_to_eat);
         i++;
     }
-     i = 0;
-     while(i < data->philo_num)
-     {
-         pthread_join(data->philos->thread[i], NULL);
-         i++;
-     }
  }
 
 
 int main(int ac, char **av)
 {
     t_data data;
-    start_time = ft_get_time_of_day();
-//    data.philos->start_time = ft_get_time_of_day();
-//    printf("philo start: %lu\n", data.philos->start_time);
-//    printf("data start :%lu\n", data.start_time);
-//    unsigned long start = ft_get_time_of_day();
-//    printf("start -> %lu", ft_get_time_of_day() - start);
-
-//    exit(0);
+    data.dead = 0;
     if(ac == 5 || ac == 6)
     {
         treat(av, &data);
         init(&data);
         create_threads(&data);
-        printf("%ld\n", data.philos[0].last_meal_time);
-        sleep(10);
-//        int i = 0;
-//        while(i < data.philo_num)
-//        {
-//            pthread_join(data.philos->thread[i], NULL);
-//            i++;
-//        }
-        // u need to add fuction to mnitor the philos
+
+        while(1)
+        {
+            if(monitor(&data) == 0)
+            {
+//                printf("maaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaat\n");
+//                printf("start time %ld\n", data.start_time);
+
+//                printf("------ %ld\n", data.philos->last_meal_time - data.start_time);
+                break;
+            }
+        }
+
+        int j = 0;
+        while(j < data.philo_num)
+        {
+            pthread_join(data.philos->thread[j], NULL);
+            j++;
+        }
     }
     else
         ft_error();
-
     return 0;
-//        int i = 0;
-//            while(i < data.philo_num) {
-//    //            printf("philo id: %d | right fork_id: %d | left fork_id: %d\n", data.philos[i].philo_id,
-//    //                   data.philos[i].right_fork->fork_id, data.philos[i].left_fork->fork_id);
-//    //
-//                printf("philo %d: | time to stleep %d : \n",data.philos[i].philo_id, data.philos[i].datas->time_to_sleep);
-//                printf("philo %d: | time to eat %d : \n", data.philos[i].philo_id, data.philos[i].datas->time_to_eat);
-//                printf("philo: %d | time to die:  %d\n", data.philos[i].philo_id, data.philos[i].datas->time_to_die);
-//                usleep(200000);
-//                i++;
-//            }
-
 }

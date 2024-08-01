@@ -1,7 +1,7 @@
 NAME = philo
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
-# -fsanitize=thread -g
+#-fsanitize=thread -g
 #-fsanitize=address -g
 SRCS = $(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
