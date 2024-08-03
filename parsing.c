@@ -26,7 +26,7 @@ void treat(char **str, t_data *data)
 {
     int i = 1;
 
-    data->numbers_time_to_eat = -1;
+//    data->philos->numbers_time_to_eat = -1;
     while(str[i])
     {
         data->philo_num = ft_atoi(arg_check(str[i++]));
@@ -34,7 +34,7 @@ void treat(char **str, t_data *data)
         data->time_to_eat = ft_atoi(arg_check(str[i++]));
         data->time_to_sleep = ft_atoi(arg_check(str[i++]));
         if(str[i] != NULL)
-            data->numbers_time_to_eat = ft_atoi(arg_check(str[i++]));
+            data->temp = ft_atoi(arg_check(str[i++]));
     }
     check_error(data);
 }

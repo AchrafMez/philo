@@ -26,21 +26,27 @@ typedef struct s_philo
     t_fork *right_fork;
     t_data *datas;
     unsigned long last_meal_time;
+    int numbers_time_to_eat;
 }   t_philo;
 
 typedef struct s_data
 {
     t_philo *philos;
     t_fork *forks;
+    unsigned long sleep;
     pthread_mutex_t last_time;
+    int args;
     unsigned int time_to_die;
     unsigned int time_to_eat;
     unsigned int time_to_sleep;
-    int numbers_time_to_eat;
+    int temp;
     int philo_num;
     pthread_mutex_t dead_mut;
+    pthread_mutex_t tte;
     int dead;
     unsigned long start_time;
+    int lmakla;
+    int count;
 } t_data;
 
 
@@ -105,7 +111,7 @@ int ft_atoi(char *str);
 void ft_arguments_error(void);
 
 //usleep
-void ft_usleep(unsigned long arg);
+void ft_usleep(unsigned long arg, t_data *data);
 unsigned long ft_get_time_of_day();
 
 #endif
