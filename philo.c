@@ -33,9 +33,10 @@ int nttoeat;
 
      //init mutexx
      i = 0;
+     pthread_mutex_init(&data->last_time, NULL);
+     pthread_mutex_init(&data->philos->meal, NULL);
      pthread_mutex_init(&data->philos->print, NULL);
      pthread_mutex_init(&data->philos->waiter, NULL);
-     pthread_mutex_init(&data->last_time, NULL);
      pthread_mutex_init(&data->dead_mut, NULL);
      pthread_mutex_init(&data->tte, NULL);
      int ret;
@@ -53,9 +54,9 @@ int get_dead(t_data *data)
 {
     //1 dead
     //0 not dead
-    int is_die;
+//    int is_die;
     pthread_mutex_lock(&data->dead_mut);
-    is_die = data->dead;
+    int is_die = data->dead;
     pthread_mutex_unlock(&data->dead_mut);
     return(is_die);
 }
@@ -98,13 +99,13 @@ void eat(t_philo *philo)
         pthread_mutex_lock(&philo->print);
         printf("%lu %d is eating\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
         ft_usleep(philo->datas->time_to_eat, philo->datas);
+        pthread_mutex_unlock(&philo->print);
         pthread_mutex_lock(&philo->datas->last_time);
         philo->last_meal_time = ft_get_time_of_day();
+        pthread_mutex_unlock(&philo->datas->last_time);
         pthread_mutex_lock(&philo->datas->tte);
         philo->datas->lmakla++;
-        pthread_mutex_unlock(&philo->datas->last_time);
         pthread_mutex_unlock(&philo->datas->tte);
-        pthread_mutex_unlock(&philo->print);
      }
 }
 
@@ -158,17 +159,21 @@ int monitor(t_data *data)
     unsigned long last_meal_t;
     while(i < data->philo_num)
     {
+            pthread_mutex_lock(&data->tte);
             if(data->args == 6 && data->lmakla > data->philos->numbers_time_to_eat * data->philo_num)
             {
                 return 2;
             }
+            pthread_mutex_unlock(&data->tte);
             pthread_mutex_lock(&data->last_time);
             last_meal_t = data->philos[i].last_meal_time;
             pthread_mutex_unlock(&data->last_time);
             if(ft_get_time_of_day() - last_meal_t >= data->time_to_die )
             {
 //                printf("%d");
+                pthread_mutex_lock(&data->dead_mut);
                 data->dead = 1;
+                pthread_mutex_unlock(&data->dead_mut);
                 printf("%lu %d died\n", ft_get_time_of_day() - data->start_time, data->philos[i].philo_id);
                 return  0;
             }
@@ -180,7 +185,6 @@ int monitor(t_data *data)
  void* routine(void *arg)
  {
     t_philo  *philo = arg;
-
      if(philo->datas->args == 6 && philo->datas->lmakla > philo->numbers_time_to_eat * philo->datas->philo_num)
      {
          return NULL ;
@@ -229,6 +233,15 @@ int monitor(t_data *data)
         i++;
     }
  }
+void eaten_meal(t_data *data)
+{
+     pthread_mutex_lock(&data->dead_mut);
+      if(data->args == 6  && data->lmakla > data->philo_num * data->philos->numbers_time_to_eat)
+          data->eaten_meal = 0;
+      else
+         data->eaten_meal = 1;
+     pthread_mutex_unlock(&data->dead_mut);
+}
 
 
 int main(int ac, char **av)
@@ -240,19 +253,11 @@ int main(int ac, char **av)
         data.args = ac;
         treat(av, &data);
         init(&data);
-//        int i = 0;
-//        while(i < data.philo_num)
-//        {
-//            printf("%d   time to eat -> %d\n",data.philos[i].philo_id, data.philos[i].numbers_time_to_eat);
-//            i++;
-//        }
-//        return 0;
-//        printf("ntto eat -> %d\n", data.philos->numbers_time_to_eat);
-//        printf(" lmakla -> %d\n", data.lmakla);
         create_threads(&data);
         while(1)
         {
-            if((data.args == 6  && data.lmakla > data.philo_num * data.philos->numbers_time_to_eat) || (monitor(&data) == 0))
+            eaten_meal(&data);
+            if ((data.eaten_meal == 0) || (monitor(&data) == 0))
             {
 //                printf("%d\n", data.lmakla);
                 break ;

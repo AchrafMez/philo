@@ -35,18 +35,19 @@ typedef struct s_data
     t_fork *forks;
     unsigned long sleep;
     pthread_mutex_t last_time;
+    pthread_mutex_t dead_mut;
+    pthread_mutex_t tte;
     int args;
     unsigned int time_to_die;
     unsigned int time_to_eat;
     unsigned int time_to_sleep;
     int temp;
     int philo_num;
-    pthread_mutex_t dead_mut;
-    pthread_mutex_t tte;
     int dead;
     unsigned long start_time;
     int lmakla;
     int count;
+    int eaten_meal;
 } t_data;
 
 
