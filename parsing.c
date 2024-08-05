@@ -1,7 +1,9 @@
 #include "philo.h"
 
-char* arg_check(char *str)
+char* arg_check(char *str, t_data *data)
 {
+    data->check_error = 0;
+
     int minus = 0;
     int plus = 0;
     int i = 0;
@@ -14,29 +16,30 @@ char* arg_check(char *str)
         i++;
     }
     if(minus >= 1 || plus > 1)
-        ft_arguments_error();
+        data->check_error++;
     while(str[i] >= '0' && str[i] <= '9')
         i++;
     if((str[i] != '\0') && (!(str[i] >= '0' && str[i] <= '9')))
-        ft_arguments_error();
+        data->check_error++;
     return str;
 }
 
-void treat(char **str, t_data *data)
+int treat(char **str, t_data *data)
 {
     int i = 1;
-
-//    data->philos->numbers_time_to_eat = -1;
     while(str[i])
     {
-        data->philo_num = ft_atoi(arg_check(str[i++]));
-        data->time_to_die = ft_atoi(arg_check(str[i++]));
-        data->time_to_eat = ft_atoi(arg_check(str[i++]));
-        data->time_to_sleep = ft_atoi(arg_check(str[i++]));
+        data->philo_num = ft_atoi(arg_check(str[i++], data));
+        data->time_to_die = ft_atoi(arg_check(str[i++], data));
+        data->time_to_eat = ft_atoi(arg_check(str[i++], data));
+        data->time_to_sleep = ft_atoi(arg_check(str[i++], data));
         if(str[i] != NULL)
-            data->temp = ft_atoi(arg_check(str[i++]));
+            data->temp = ft_atoi(arg_check(str[i++], data));
     }
-    check_error(data);
+    if(check_error(data) == 1 || data->check_error >= 1)
+        return 1;
+    else
+        return 0;
 }
 
 int ft_atoi(char *str)

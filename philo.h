@@ -46,10 +46,8 @@ typedef struct s_data
     int dead;
     unsigned long start_time;
     pthread_mutex_t lmakla_mut;
-    pthread_mutex_t test;
     int lmakla;
-    int count;
-    int eaten_meal;
+    int check_error;
 } t_data;
 
 
@@ -104,12 +102,12 @@ typedef struct s_data
             //  lock the printf mutex so that no ither thread can run printf
             // kill all philosephers
 //errors
-void ft_error(void);
-void check_error(t_data *data);
+int ft_error(void);
+int check_error(t_data *data);
 
 //parsing
-char *arg_check(char *str);
-void treat(char **str, t_data *data);
+char *arg_check(char *str, t_data *data);
+int treat(char **str, t_data *data);
 int ft_atoi(char *str);
 void ft_arguments_error(void);
 
