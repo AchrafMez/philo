@@ -6,16 +6,15 @@ void ft_arguments_error(void)
     exit(1);
 }
 
-int nttoeat;
- void init(t_data *data)
+ int init(t_data *data)
  {
      int i = 0;
      data->philos = (t_philo *)malloc(sizeof(t_philo) * data->philo_num);
      if(!data->philos)
-            return ;
+            return 1;
      data->forks = malloc(sizeof(t_fork) * data->philo_num);
      if(!data->forks)
-         return ;
+         return 1;
      data->lmakla = 0;
      data->count = 0;
      while(i < data->philo_num)
@@ -39,17 +38,44 @@ int nttoeat;
      pthread_mutex_init(&data->philos->waiter, NULL);
      pthread_mutex_init(&data->dead_mut, NULL);
      pthread_mutex_init(&data->tte, NULL);
+     pthread_mutex_init(&data->sleep, NULL);
+     pthread_mutex_init(&data->lmakla_mut, NULL);
      int ret;
      while(i < data->philo_num)
      {
          ret = pthread_mutex_init(&(data->forks[i].fork), NULL);
          if(ret != 0){
              printf("error in init the mutexes");
-             exit(1);
+             return 1;
          }
          i++;
      }
+     return 0;
  }
+
+ void destroy(t_data *data)
+ {
+     int i = 0;
+     while(i < data->philo_num)
+     {
+         pthread_detach(data->philos->thread[i]);
+//         free(data->philos->thread[i]);
+         i++;
+     }
+     free(data->philos->thread);
+     pthread_mutex_destroy(&data->last_time);
+     pthread_mutex_destroy(&data->philos->meal);
+     pthread_mutex_destroy(&data->philos->print);
+     pthread_mutex_destroy(&data->philos->waiter);
+     pthread_mutex_destroy(&data->dead_mut);
+     pthread_mutex_destroy(&data->tte);
+     pthread_mutex_destroy(&data->sleep);
+     pthread_mutex_destroy(&data->lmakla_mut);
+//     free(data->pho)
+     free(data->philos);
+     free(data->forks);
+ }
+
 int get_dead(t_data *data)
 {
     //1 dead
@@ -64,17 +90,21 @@ int get_dead(t_data *data)
 int pick_up_forks(t_philo *philo)
 {
     if((pthread_mutex_lock(&(philo->right_fork->fork)) == 0) && (get_dead(philo->datas) == 0)){
+        pthread_mutex_lock(&philo->print);
         printf("%lu %d has taken a fork\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
+        pthread_mutex_unlock(&philo->print);
     }
     if(philo->datas->philo_num == 1)
     {
         ft_usleep(philo->datas->time_to_die, philo->datas);
-        printf("%lu %d died\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
+//        printf("%lu %d died\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
         return 1;
     }
     else if( (pthread_mutex_lock(&(philo->left_fork->fork)) == 0) && (get_dead(philo->datas)) == 0)
     {
+        pthread_mutex_lock(&philo->print);
         printf("%lu %d has taken a fork\n", ft_get_time_of_day() - philo->datas->start_time, philo->philo_id);
+        pthread_mutex_unlock(&philo->print);
     }
 //    else
 //    {
@@ -90,7 +120,12 @@ void put_down_forks(t_philo *philo)
     pthread_mutex_unlock(&philo->left_fork->fork);
 }
 
-
+void write_on_lmakla(t_data *data)
+{
+    pthread_mutex_lock(&data->lmakla_mut);
+    data->lmakla++;
+    pthread_mutex_unlock(&data->lmakla_mut);
+}
 void eat(t_philo *philo)
 {
      if(get_dead(philo->datas) == 0)
@@ -103,9 +138,7 @@ void eat(t_philo *philo)
         pthread_mutex_lock(&philo->datas->last_time);
         philo->last_meal_time = ft_get_time_of_day();
         pthread_mutex_unlock(&philo->datas->last_time);
-        pthread_mutex_lock(&philo->datas->tte);
-        philo->datas->lmakla++;
-        pthread_mutex_unlock(&philo->datas->tte);
+         write_on_lmakla(philo->datas);
      }
 }
 
@@ -130,14 +163,14 @@ void thinking(t_philo *philo)
          pthread_mutex_unlock(&philo->print);
     }
  }
-int get_tte(t_philo *philo)
-{
-     int tte;
-     pthread_mutex_lock(&philo->datas->tte);
-     tte = philo->numbers_time_to_eat;
-     pthread_mutex_unlock(&philo->datas->tte);
-     return tte;
-}
+//int get_tte(t_philo *philo)
+//{
+//     int tte;
+//     pthread_mutex_lock(&philo->datas->tte);
+//     tte = philo->numbers_time_to_eat;
+//     pthread_mutex_unlock(&philo->datas->tte);
+//     return tte;
+//}
 
 // int count_meals_eaten(t_data *data)
 // {
@@ -153,18 +186,33 @@ int get_tte(t_philo *philo)
 //    return 0;
 // }
 
+int get_lmakla(t_data *data)
+{
+     pthread_mutex_lock(&data->lmakla_mut);
+     if(data->args == 6 && data->lmakla > data->philos->numbers_time_to_eat * data->philo_num)
+     {
+         pthread_mutex_unlock(&data->lmakla_mut);
+         return 0;
+     }
+     else
+     {
+        pthread_mutex_unlock(&data->lmakla_mut);
+         return 1;
+     }
+}
 int monitor(t_data *data)
 {
     int i = 0;
     unsigned long last_meal_t;
     while(i < data->philo_num)
     {
-            pthread_mutex_lock(&data->tte);
-            if(data->args == 6 && data->lmakla > data->philos->numbers_time_to_eat * data->philo_num)
+//            pthread_mutex_lock(&data->tte);
+            if((get_lmakla(data) == 0))
             {
+//                pthread_mutex_unlock(&data->tte);
                 return 2;
             }
-            pthread_mutex_unlock(&data->tte);
+//            pthread_mutex_unlock(&data->tte);
             pthread_mutex_lock(&data->last_time);
             last_meal_t = data->philos[i].last_meal_time;
             pthread_mutex_unlock(&data->last_time);
@@ -173,8 +221,8 @@ int monitor(t_data *data)
 //                printf("%d");
                 pthread_mutex_lock(&data->dead_mut);
                 data->dead = 1;
-                pthread_mutex_unlock(&data->dead_mut);
                 printf("%lu %d died\n", ft_get_time_of_day() - data->start_time, data->philos[i].philo_id);
+                pthread_mutex_unlock(&data->dead_mut);
                 return  0;
             }
         i++;
@@ -185,7 +233,7 @@ int monitor(t_data *data)
  void* routine(void *arg)
  {
     t_philo  *philo = arg;
-     if(philo->datas->args == 6 && philo->datas->lmakla > philo->numbers_time_to_eat * philo->datas->philo_num)
+     if((get_lmakla(philo->datas) == 0))
      {
          return NULL ;
      }
@@ -194,7 +242,7 @@ int monitor(t_data *data)
      while (1)
      {
 
-         if(philo->datas->args == 6 && philo->datas->lmakla > philo->numbers_time_to_eat * philo->datas->philo_num)
+         if((get_lmakla(philo->datas) == 0))
          {
              return NULL ;
          }
@@ -207,12 +255,12 @@ int monitor(t_data *data)
          pick_up_forks(philo);
          eat(philo);
          put_down_forks(philo);
-         if(philo->datas->args == 6 && philo->datas->lmakla > philo->numbers_time_to_eat * philo->datas->philo_num)
+         if((get_lmakla(philo->datas) == 0))
          {
              return NULL ;
          }
          sleeping(philo);
-         if(philo->datas->args == 6 && philo->datas->lmakla > philo->numbers_time_to_eat * philo->datas->philo_num)
+         if((get_lmakla(philo->datas) == 0))
          {
              return NULL ;
          }
@@ -233,20 +281,27 @@ int monitor(t_data *data)
         i++;
     }
  }
-void eaten_meal(t_data *data)
-{
-     pthread_mutex_lock(&data->dead_mut);
-      if(data->args == 6  && data->lmakla > data->philo_num * data->philos->numbers_time_to_eat)
-          data->eaten_meal = 0;
-      else
-         data->eaten_meal = 1;
-     pthread_mutex_unlock(&data->dead_mut);
-}
+//void eaten_meal(t_data *data)
+//{
+//     pthread_mutex_lock(&data->dead_mut);
+//      if(data->args == 6  && data->lmakla > data->philo_num * data->philos->numbers_time_to_eat)
+//          data->eaten_meal = 0;
+//      else
+//         data->eaten_meal = 1;
+//     pthread_mutex_unlock(&data->dead_mut);
+//}
+//
 
+void test()
+{
+     system("leaks philo ");
+}
 
 int main(int ac, char **av)
 {
     t_data data;
+
+    atexit(test);
     data.dead = 0;
     if(ac == 5 || ac == 6)
     {
@@ -256,9 +311,10 @@ int main(int ac, char **av)
         create_threads(&data);
         while(1)
         {
-            eaten_meal(&data);
-            if ((data.eaten_meal == 0) || (monitor(&data) == 0))
+//            eaten_meal(&data);
+            if ((get_lmakla(&data) == 0) || (monitor(&data) == 0))
             {
+//                data.args == 6  && data.lmakla > data.philo_num * data.philos->numbers_time_to_eat)
 //                printf("%d\n", data.lmakla);
                 break ;
             }
@@ -273,5 +329,6 @@ int main(int ac, char **av)
     }
     else
         ft_error();
+    destroy(&data);
     return 0;
 }

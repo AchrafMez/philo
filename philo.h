@@ -33,7 +33,7 @@ typedef struct s_data
 {
     t_philo *philos;
     t_fork *forks;
-    unsigned long sleep;
+    pthread_mutex_t sleep;
     pthread_mutex_t last_time;
     pthread_mutex_t dead_mut;
     pthread_mutex_t tte;
@@ -45,6 +45,8 @@ typedef struct s_data
     int philo_num;
     int dead;
     unsigned long start_time;
+    pthread_mutex_t lmakla_mut;
+    pthread_mutex_t test;
     int lmakla;
     int count;
     int eaten_meal;
@@ -114,5 +116,8 @@ void ft_arguments_error(void);
 //usleep
 void ft_usleep(unsigned long arg, t_data *data);
 unsigned long ft_get_time_of_day();
+
+//
+int get_lmakla(t_data *data);
 
 #endif

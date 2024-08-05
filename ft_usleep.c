@@ -13,16 +13,16 @@ unsigned long ft_get_time_of_day()
 void ft_usleep(unsigned long arg, t_data *data)
 {
 
+    pthread_mutex_lock(&data->sleep);
     unsigned long start_time = ft_get_time_of_day();
     while(arg > ft_get_time_of_day() - start_time)
     {
-        pthread_mutex_lock(&data->tte);
-        if(data->args == 6 && data->philo_num * data->philos->numbers_time_to_eat < data->lmakla)
+        if(get_lmakla(data) == 0)
         {
-            pthread_mutex_unlock(&data->tte);
+            pthread_mutex_unlock(&data->sleep);
             return ;
         }
-        pthread_mutex_unlock(&data->tte);
         usleep(100);
+        pthread_mutex_unlock(&data->sleep);
     }
 }
