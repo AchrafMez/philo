@@ -1,7 +1,4 @@
-CmakeLists.txt
-todo
-a.out
-test
-cmake-build-debug
-.vs-code
-.idea
+CmakeLists.txt/
+cmake-build-debug/
+.vscode/
+.vscode/
