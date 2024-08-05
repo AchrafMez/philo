@@ -1,4 +1,4 @@
 CmakeLists.txt/
 cmake-build-debug/
 .vscode/
-.vscode/
+.idea/
