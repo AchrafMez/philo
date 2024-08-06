@@ -6,7 +6,7 @@
 /*   By: amezioun <amezioun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/05 20:06:12 by amezioun          #+#    #+#             */
-/*   Updated: 2024/08/05 23:49:57 by amezioun         ###   ########.fr       */
+/*   Updated: 2024/08/06 15:06:30 by amezioun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,6 @@ int						check_error(t_data *data);
 char					*arg_check(char *str, t_data *data);
 int						treat(char **str, t_data *data);
 int						ft_atoi(char *str);
-void					ft_arguments_error(void);
 
 //usleep
 void					ft_usleep(unsigned long arg, t_data *data);

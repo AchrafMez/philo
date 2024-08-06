@@ -6,7 +6,7 @@
 /*   By: amezioun <amezioun@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/05 20:21:29 by amezioun          #+#    #+#             */
-/*   Updated: 2024/08/05 23:51:21 by amezioun         ###   ########.fr       */
+/*   Updated: 2024/08/06 15:07:22 by amezioun         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,8 @@ int	monitor(t_data *data)
 		{
 			pthread_mutex_lock(&data->dead_mut);
 			data->dead = 1;
-			pthread_mutex_lock(&data->philos->print);
 			printf("%lu %d died\n", ft_get_time_of_day() - data->start_time,
 				data->philos[i].philo_id);
-			pthread_mutex_unlock(&data->philos->print);
 			pthread_mutex_unlock(&data->dead_mut);
 			return (0);
 		}
