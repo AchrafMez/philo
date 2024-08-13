@@ -1,5 +1,4 @@
 language: c
-compiler:
-  -cc
-  -clang
-script: make
+compiler: gcc
+script:
+  - make
